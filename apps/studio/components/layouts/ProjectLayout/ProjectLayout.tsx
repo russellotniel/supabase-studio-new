@@ -139,14 +139,14 @@ const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<ProjectLayout
           <Head>
             <title>
               {title
-                ? `${title} | Supabase`
+                ? `${title} | Kalbe DevStreams`
                 : selectedTable
-                  ? `${selectedTable} | ${projectName} | ${organizationName} | Supabase`
+                  ? `${selectedTable} | ${projectName} | ${organizationName} | Kalbe DevStreams`
                   : projectName
-                    ? `${projectName} | ${organizationName} | Supabase`
+                    ? `${projectName} | ${organizationName} | Kalbe DevStreams`
                     : organizationName
-                      ? `${organizationName} | Supabase`
-                      : 'Supabase'}
+                      ? `${organizationName} | Kalbe DevStreams`
+                      : 'Kalbe DevStreams'}
             </title>
             <meta name="description" content="Supabase Studio" />
           </Head>
