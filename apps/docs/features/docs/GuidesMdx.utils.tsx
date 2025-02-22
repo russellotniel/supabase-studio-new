@@ -33,13 +33,13 @@ const PUBLISHED_SECTIONS = [
   // 'graphql', -- technically published, but completely federated
   'integrations',
   'local-development',
-  'monitoring-troubleshooting',
   'platform',
   'queues',
   'realtime',
   'resources',
   'self-hosting',
   'storage',
+  'telemetry',
 ] as const
 
 const getGuidesMarkdownInternal = async (slug: string[]) => {
@@ -89,7 +89,7 @@ const getGuidesMarkdownInternal = async (slug: string[]) => {
 const getGuidesMarkdown = cache_fullProcess_withDevCacheBust(
   getGuidesMarkdownInternal,
   GUIDES_DIRECTORY,
-  (filename: string) => JSON.stringify([{ slug: filename.replace(/\.mdx$/, '').split(sep) }])
+  (filename: string) => JSON.stringify([filename.replace(/\.mdx$/, '').split(sep)])
 )
 
 const genGuidesStaticParams = (directory?: string) => async () => {
