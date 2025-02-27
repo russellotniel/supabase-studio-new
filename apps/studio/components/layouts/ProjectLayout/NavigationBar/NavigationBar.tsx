@@ -231,18 +231,7 @@ export const NavContent = () => {
   return (
     <>
       <ul className="flex flex-col gap-y-1 justify-start px-2 relative">
-        <Link
-          href={IS_PLATFORM ? '/projects' : `/project/${projectRef}`}
-          className="mx-2 hidden md:flex items-center w-[40px] h-[40px]"
-          onClick={onCloseNavigationIconLink}
-        >
-          <img
-            alt="Kalbe Logo"
-            src={`${router.basePath}/img/logo.svg`}
-            className="absolute h-[40px] w-6 cursor-pointer rounded"
-          />
-        </Link>
-        {/* <NavigationIconLink
+        <NavigationIconLink
           isActive={isUndefined(activeRoute) && !isUndefined(router.query.ref)}
           route={{
             key: 'HOME',
@@ -252,7 +241,7 @@ export const NavContent = () => {
             linkElement: <ProjectIndexPageLink projectRef={projectRef} />,
           }}
           onClick={onCloseNavigationIconLink}
-        /> */}
+        />
         <Separator className="my-1 bg-border-muted" />
         {toolRoutes.map((route) => (
           <NavigationIconLink

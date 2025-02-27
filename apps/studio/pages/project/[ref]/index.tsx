@@ -48,7 +48,7 @@ const Home: NextPageWithLayout = () => {
   const projectName =
     project?.ref !== 'default' && project?.name !== undefined
       ? project?.name
-      : 'Welcome to Devstreams-API'
+      : 'Welcome to Kalbe DevStreams-API'
 
   return (
     <div className="w-full mx-auto my-12 md:my-16 space-y-12 md:space-y-16 max-w-7xl">
