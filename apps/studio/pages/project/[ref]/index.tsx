@@ -48,13 +48,16 @@ const Home: NextPageWithLayout = () => {
   const projectName =
     project?.ref !== 'default' && project?.name !== undefined
       ? project?.name
-      : 'Welcome to Kalbe DevStreams-API'
+      : 'Welcome to DevStreams-API'
 
   return (
     <div className="w-full mx-auto my-12 md:my-16 space-y-12 md:space-y-16 max-w-7xl">
       <div className="flex flex-col md:flex-row md:items-center justify-between mx-6 gap-6">
         <div className="flex flex-col md:flex-row md:items-center gap-3">
-          <h1 className="text-3xl">{projectName}</h1>
+          <div>
+            <h1 className="text-3xl">{projectName}</h1>
+            <h1 className="text-3sm">Powered by Supabase</h1>
+          </div>
           {isOrioleDb && (
             <Tooltip>
               <TooltipTrigger>
@@ -103,37 +106,6 @@ const Home: NextPageWithLayout = () => {
               {CLIENT_LIBRARIES.map((library) => (
                 <ClientLibrary key={library.language} {...library} />
               ))}
-            </div>
-          </div>
-          <div className="space-y-8">
-            <div className="mx-6">
-              <h4 className="text-lg">Example projects</h4>
-            </div>
-            <div className="flex justify-center mx-6">
-              <Tabs_Shadcn_ defaultValue="app">
-                <TabsList_Shadcn_ className="flex gap-4">
-                  <TabsTrigger_Shadcn_ value="app">App Frameworks</TabsTrigger_Shadcn_>
-                  <TabsTrigger_Shadcn_ value="mobile">Mobile Framework</TabsTrigger_Shadcn_>
-                </TabsList_Shadcn_>
-                <TabsContent_Shadcn_ value="app">
-                  <div className="grid gap-2 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {EXAMPLE_PROJECTS.filter((project) => project.type === 'app')
-                      .sort((a, b) => a.title.localeCompare(b.title))
-                      .map((project) => (
-                        <ExampleProject key={project.url} {...project} />
-                      ))}
-                  </div>
-                </TabsContent_Shadcn_>
-                <TabsContent_Shadcn_ value="mobile">
-                  <div className="grid gap-2 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {EXAMPLE_PROJECTS.filter((project) => project.type === 'mobile')
-                      .sort((a, b) => a.title.localeCompare(b.title))
-                      .map((project) => (
-                        <ExampleProject key={project.url} {...project} />
-                      ))}
-                  </div>
-                </TabsContent_Shadcn_>
-              </Tabs_Shadcn_>
             </div>
           </div>
         </>
