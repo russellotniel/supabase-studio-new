@@ -1,80 +1,120 @@
-import { Clipboard, Edit, Trash } from 'lucide-react'
-import { useCallback } from 'react'
-import { Item, ItemParams, Menu, PredicateParams, Separator } from 'react-contexify'
-
+import { useQueryClient } from '@tanstack/react-query'
+import { ROW_CONTEXT_MENU_ID } from 'components/grid/constants'
 import type { SupaRow } from 'components/grid/types'
+import { queueRowDeletesWithOptimisticUpdate } from 'components/grid/utils/queueOperationUtils'
+import { useIsQueueOperationsEnabled } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
+import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { Copy, Edit, Trash } from 'lucide-react'
+import { useCallback } from 'react'
+import { Item, ItemParams, Menu } from 'react-contexify'
+import { toast } from 'sonner'
 import { useTableEditorStateSnapshot } from 'state/table-editor'
-import { ROW_CONTEXT_MENU_ID } from '.'
-import { useTrackedState } from '../../store/Store'
-import { copyToClipboard, formatClipboardValue } from '../../utils/common'
+import { useTableEditorTableStateSnapshot } from 'state/table-editor-table'
+import { DialogSectionSeparator, copyToClipboard } from 'ui'
 
-export type RowContextMenuProps = {
+import { formatClipboardValue } from '../../utils/common'
+
+type RowContextMenuProps = {
   rows: SupaRow[]
 }
 
-const RowContextMenu = ({ rows }: RowContextMenuProps) => {
-  const state = useTrackedState()
-  const snap = useTableEditorStateSnapshot()
+type RowContextMenuItemProps = ItemParams<{ rowIdx: number }, string>
 
-  function onDeleteRow(p: ItemParams) {
-    const { props } = p
-    const { rowIdx } = props
+export const RowContextMenu = ({ rows }: RowContextMenuProps) => {
+  const queryClient = useQueryClient()
+  const { data: project } = useSelectedProjectQuery()
+  const tableEditorSnap = useTableEditorStateSnapshot()
+  const snap = useTableEditorTableStateSnapshot()
+  const isQueueOperationsEnabled = useIsQueueOperationsEnabled()
+
+  function onDeleteRow(p: RowContextMenuItemProps) {
+    const rowIdx = p.props?.rowIdx
+    if (rowIdx === undefined || rowIdx === null) return
+
     const row = rows[rowIdx]
-    if (row) snap.onDeleteRows([row])
+    if (!row) {
+      toast.error('Row not found')
+      return
+    }
+
+    if (isQueueOperationsEnabled) {
+      queueRowDeletesWithOptimisticUpdate({
+        rows: [row],
+        table: snap.originalTable,
+        queryClient,
+        queueOperation: tableEditorSnap.queueOperation,
+        projectRef: project?.ref,
+      })
+      return
+    }
+
+    tableEditorSnap.onDeleteRows([row])
   }
 
-  function onEditRowClick(p: ItemParams) {
-    const { props } = p
-    const { rowIdx } = props
-    const row = rows[rowIdx]
-    if (state.onEditRow) state.onEditRow(row)
-  }
+  function onEditRowClick(p: RowContextMenuItemProps) {
+    const rowIdx = p.props?.rowIdx
+    if (rowIdx === undefined || rowIdx === null) return
 
-  function isItemHidden({ data }: PredicateParams) {
-    if (data === 'edit') return state.onEditRow == undefined
-    if (data === 'delete') return !state.editable
-    return false
+    const row = rows[rowIdx]
+    tableEditorSnap.onEditRow(row)
   }
 
   const onCopyCellContent = useCallback(
-    (p: ItemParams) => {
-      const { props } = p
+    (p: RowContextMenuItemProps) => {
+      const rowIdx = p.props?.rowIdx
+      if (!snap.selectedCellPosition || rowIdx === undefined || rowIdx === null) return
 
-      if (!state.selectedCellPosition || !props) {
-        return
-      }
-
-      const { rowIdx } = props
       const row = rows[rowIdx]
-
-      const columnKey = state.gridColumns[state.selectedCellPosition?.idx as number].key
+      const columnKey = snap.gridColumns[snap.selectedCellPosition.idx as number].key
 
       const value = row[columnKey]
       const text = formatClipboardValue(value)
 
       copyToClipboard(text)
+      toast.success('Copied cell value to clipboard')
     },
-    [rows, state.gridColumns, state.selectedCellPosition]
+    [rows, snap.gridColumns, snap.selectedCellPosition]
+  )
+
+  const onCopyRowContent = useCallback(
+    (p: RowContextMenuItemProps) => {
+      const rowIdx = p.props?.rowIdx
+      if (rowIdx === undefined || rowIdx === null) return
+
+      const row = rows[rowIdx]
+      copyToClipboard(JSON.stringify(row))
+      toast.success('Copied row to clipboard')
+    },
+    [rows]
   )
 
   return (
-    <>
-      <Menu id={ROW_CONTEXT_MENU_ID} animation={false}>
-        <Item onClick={onCopyCellContent}>
-          <Clipboard size={14} />
-          <span className="ml-2 text-xs">Copy cell content</span>
-        </Item>
-        <Item onClick={onEditRowClick} hidden={isItemHidden} data="edit">
-          <Edit size={14} />
-          <span className="ml-2 text-xs">Edit row</span>
-        </Item>
-        {state.editable && <Separator />}
-        <Item onClick={onDeleteRow} hidden={isItemHidden} data="delete">
-          <Trash size={14} stroke="red" />
-          <span className="ml-2 text-xs">Delete row</span>
-        </Item>
-      </Menu>
-    </>
+    <Menu id={ROW_CONTEXT_MENU_ID} animation={false} className="!min-w-36">
+      <Item onClick={onCopyCellContent}>
+        <Copy size={12} />
+        <span className="ml-2 text-xs">Copy cell</span>
+      </Item>
+      <Item onClick={onCopyRowContent}>
+        <Copy size={12} />
+        <span className="ml-2 text-xs">Copy row</span>
+      </Item>
+
+      {/* We can't just wrap this entire section in a fragment conditional
+		  on snap.editable because of a bug in react-contexify. Only the
+		  top-level children of Menu are cloned with the necessary bound props,
+		  so Items must be direct children of Menu:
+		  https://github.com/fkhadra/react-contexify/blob/8d9fc63ac13040d3250e8eefd593d50a3ebdd1e6/src/components/Menu.tsx#L295
+		*/}
+      {snap.editable && <DialogSectionSeparator className="my-1.5" />}
+      <Item onClick={onEditRowClick} hidden={!snap.editable} data="edit">
+        <Edit size={12} />
+        <span className="ml-2 text-xs">Edit row</span>
+      </Item>
+      {snap.editable && <DialogSectionSeparator className="my-1.5" />}
+      <Item onClick={onDeleteRow} hidden={!snap.editable} data="delete">
+        <Trash size={12} />
+        <span className="ml-2 text-xs">Delete row</span>
+      </Item>
+    </Menu>
   )
 }
-export default RowContextMenu

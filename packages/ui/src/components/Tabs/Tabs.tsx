@@ -9,6 +9,7 @@ import {
   type PropsWithChildren,
   type RefObject,
 } from 'react'
+
 import styleHandler from '../../lib/theme/styleHandler'
 
 export interface TabsProps {
@@ -38,7 +39,7 @@ interface TabsSubComponents {
 }
 
 /**
- * @deprecated Use ./Tabs_shadcn_ instead
+ * @deprecated Use `import { Tabs_shadcn_ } from "ui"` instead
  */
 const Tabs: React.FC<PropsWithChildren<TabsProps>> & TabsSubComponents = ({
   defaultActiveId,

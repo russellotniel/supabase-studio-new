@@ -2,9 +2,9 @@ import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { Check, ChevronsUpDown, Plus } from 'lucide-react'
 import { useState } from 'react'
 
-import { useProjectContext } from 'components/layouts/ProjectLayout/ProjectContext'
 import { useSchemasQuery } from 'data/database/schemas-query'
-import { useCheckPermissions } from 'hooks/misc/useCheckPermissions'
+import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
+import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import {
   AlertDescription_Shadcn_,
   AlertTitle_Shadcn_,
@@ -34,9 +34,10 @@ interface SchemaSelectorProps {
   excludedSchemas?: string[]
   onSelectSchema: (name: string) => void
   onSelectCreateSchema?: () => void
+  align?: 'start' | 'end'
 }
 
-const SchemaSelector = ({
+export const SchemaSelector = ({
   className,
   disabled = false,
   size = 'tiny',
@@ -46,14 +47,18 @@ const SchemaSelector = ({
   excludedSchemas = [],
   onSelectSchema,
   onSelectCreateSchema,
+  align = 'start',
 }: SchemaSelectorProps) => {
   const [open, setOpen] = useState(false)
-  const canCreateSchemas = useCheckPermissions(PermissionAction.TENANT_SQL_ADMIN_WRITE, 'schemas')
+  const { can: canCreateSchemas } = useAsyncCheckPermissions(
+    PermissionAction.TENANT_SQL_ADMIN_WRITE,
+    'schemas'
+  )
 
-  const { project } = useProjectContext()
+  const { data: project } = useSelectedProjectQuery()
   const {
     data,
-    isLoading: isSchemasLoading,
+    isPending: isSchemasLoading,
     isSuccess: isSchemasSuccess,
     isError: isSchemasError,
     error: schemasError,
@@ -117,19 +122,19 @@ const SchemaSelector = ({
                 </div>
               ) : (
                 <div className="w-full flex gap-1">
-                  <p className="text-foreground-lighter">Choose a schema…</p>
+                  <p className="text-foreground-lighter">Choose a schema...</p>
                 </div>
               )}
             </Button>
           </PopoverTrigger_Shadcn_>
           <PopoverContent_Shadcn_
-            className="p-0 min-w-[200px]"
+            className="p-0 min-w-[200px] pointer-events-auto"
             side="bottom"
-            align="start"
+            align={align}
             sameWidthAsTrigger
           >
             <Command_Shadcn_>
-              <CommandInput_Shadcn_ placeholder="Find schema..." />
+              <CommandInput_Shadcn_ className="text-xs" placeholder="Find schema..." />
               <CommandList_Shadcn_>
                 <CommandEmpty_Shadcn_>No schemas found</CommandEmpty_Shadcn_>
                 <CommandGroup_Shadcn_>
