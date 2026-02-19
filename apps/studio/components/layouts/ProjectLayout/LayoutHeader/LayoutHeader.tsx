@@ -150,64 +150,65 @@ export const LayoutHeader = ({
               <div className="ml-3 text-xs text-foreground-light">Default project</div>
             )}
 
-            {projectRef && IS_PLATFORM && (
-              <>
-                <div className="flex items-center">
-                  <OrganizationDropdown />
-                </>
-              ) : null}
-              <AnimatePresence>
-                {projectRef && (
-                  <motion.div
-                    className="flex items-center"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{
-                      duration: 0.15,
-                      ease: 'easeOut',
-                    }}
-                  >
-                    <LayoutHeaderDivider />
-                    <ProjectDropdown />
+            {projectRef && IS_PLATFORM ? (
+              <div className="flex items-center">
+                <OrganizationDropdown />
+              </div>
+            ) : null}
 
-                    {exceedingLimits && (
-                      <div className="ml-2">
-                        <Link href={`/org/${selectedOrganization?.slug}/usage`}>
-                          <Badge variant="destructive">Exceeding usage limits</Badge>
-                        </Link>
-                      </div>
-                    )}
+            <AnimatePresence>
+              {projectRef && (
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{
+                    duration: 0.15,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <LayoutHeaderDivider />
+                  <ProjectDropdown />
 
-                    {selectedProject && (
-                      <>
-                        <LayoutHeaderDivider />
-                        {IS_PLATFORM && <BranchDropdown />}
-                      </>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  {exceedingLimits && (
+                    <div className="ml-2">
+                      <Link href={`/org/${selectedOrganization?.slug}/usage`}>
+                        <Badge variant="destructive">Exceeding usage limits</Badge>
+                      </Link>
+                    </div>
+                  )}
 
-              <AnimatePresence>
-                {headerTitle && (
-                  <motion.div
-                    className="flex items-center"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{
-                      duration: 0.15,
-                      ease: 'easeOut',
-                    }}
-                  >
-                    <LayoutHeaderDivider />
-                    <span className="text-foreground">{headerTitle}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  {selectedProject && (
+                    <>
+                      <LayoutHeaderDivider />
+                      {IS_PLATFORM && <BranchDropdown />}
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
+            <AnimatePresence>
+              {headerTitle && (
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{
+                    duration: 0.15,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <LayoutHeaderDivider />
+                  <span className="text-foreground">{headerTitle}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="flex items-center">
             <AnimatePresence>
               {projectRef && (
                 <motion.div
@@ -227,6 +228,7 @@ export const LayoutHeader = ({
             </AnimatePresence>
             <BreadcrumbsView defaultValue={breadcrumbs} />
           </div>
+
           <div className="flex items-center gap-x-2">
             {customHeaderComponents && customHeaderComponents}
             {IS_PLATFORM ? (
